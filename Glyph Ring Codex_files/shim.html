@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<!-- saved from url=(0132)blob:https://0hog42f8a7zttiv03oko2xod67env1nwtoey573aj0peovlk1z-h766678603.scf.usercontent.goog/b207b8ab-9322-4a30-8dcc-b611711c8ae7 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjhmODcxYTU0ODRjYWM0MjU5NTBiNzhiNGZhNWMxZGZlMjkzYjgwYWEiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6XC9cL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbVwvZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNzA5OTE3NjQxNTIxMjE5MTk2MSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJleHAiOjE3NDkzNzg3NjksImlhdCI6MTc0OTM3NTE2OSwiYWxnIjoiUlMyNTYifQ.YKUEbnZmsxPsVo3Iz0xrYgiV_gAETkvFYKzkvXcxY7ur6yPfPNaqH7XQqazufb586HeeN6P7jDmDh1Crbb1ymuAgJFiZZbXOKpOfJJO0R8fvZU-if9T2NYmglQ7aRyIaO1yjzvRqDRCIc-J-sFG3nysbXD5Ri9FzKqkEENP7lultfTt7i17tWUG-IYrJdSzNK2IKvQzlkpj4FraHXCgpd28aCjSly2KiE7m9zBps2j1M_uwstunlbyXRkhbdOxdMpjacy6zXNU9QBEWibFDOIxdHjCCZ_yv_UnQSar4YrrReED4_NTOti9a3JZWnVMTRYSAKPggwTsG90OFAWrpMLQ","c_4a27649525fdd131_codex_oracle_index_html-262")</script><script>(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script>let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          const mediaPromiseId = nextMediaPromiseId++;
+          const promise = new Promise((resolve, reject) => {
+            pendingMediaResolvers[mediaPromiseId] = (granted) => {
+              delete pendingMediaResolvers[mediaPromiseId];
+              if (granted) {
+                if (originalGetUserMedia) {
+                  originalGetUserMedia(constraints).then(resolve).catch(reject);
+                } else {
+                  reject(new Error("Original getUserMedia not available."));
+                }
+              } else {
+              reject(new DOMException('Permission denied', 'NotAllowedError'));
+            }
+          };
+        });
+
+        window.parent.postMessage({
+          type: 'requestMediaPermission',
+          constraints: constraints,
+          promiseId: mediaPromiseId,
+        }, '*');
+
+        return promise;
+      },
+      writable: false,
+      configurable: false
+    });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script>((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-2.5-flash-preview-04-17","imageModelName":"imagen-3.0-generate-002","videoModelName":"veo-2.0-generate-001","deprecatedTextModelNames":["gemini-2.0-flash"]})</script><script>(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Glyph Ring Codex Oracle</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js" crossorigin="anonymous"></script>
+    <style>
+        /* FONT IMPORT */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Junge&display=swap');
+
+        /* GENERAL STYLING */
+        body {
+            background-color: #121212;
+            color: #D4AF37; /* A rich gold color */
+            font-family: 'Junge', serif;
+            margin: 0;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1, h2 {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+        
+        /* AUDIO CONTROL */
+        #audio-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: transparent;
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            z-index: 1001;
+        }
+        
+        #audio-control:hover {
+             box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        /* ACTION CONTROLS */
+        .controls {
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .oracle-btn {
+            background-color: transparent;
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            padding: 10px 20px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .oracle-btn:hover {
+            background-color: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
+        /* CARD GRID */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            transition: opacity 0.5s ease;
+        }
+
+        /* SPREAD DISPLAY */
+        #spread-display {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem; /* Reduced gap */
+            margin-top: 2rem;
+            position: relative;
+        }
+        
+        /* HIDDEN SPREAD AURA */
+        #spread-display.hidden-spread-active::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0) 70%);
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            animation: slowPulse 5s infinite;
+        }
+
+        .spread-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .spread-layout {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .spread-position {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeInCard 0.5s ease-out forwards;
+        }
+
+        .spread-position-label {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+
+        .card {
+            background-color: #1a1a1a;
+            border: 1px solid #D4AF37;
+            border-radius: 10px;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            aspect-ratio: 2.75 / 4.75;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: relative;
+            width: 180px; /* Fixed width for consistency */
+            max-width: 100%; /* Responsive fix */
+        }
+
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slowPulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.15; }
+            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.25; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.15; }
+        }
+        
+        .glowing-card {
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.6), inset 0 0 15px rgba(212, 175, 55, 0.2);
+            border-color: #fff;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .card-numeral {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+
+        .card-glyph-symbol {
+            font-size: 4rem;
+            line-height: 1;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff; /* White for the glyph for contrast */
+            text-shadow: 0 0 10px #D4AF37;
+        }
+
+        .card-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        
+        .card-keyword {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        
+        /* ORACLE SPEAKS SECTION */
+        #oracle-reading {
+            margin-top: 2rem;
+            padding: 1.5rem 2rem;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 10px;
+            background-color: rgba(212, 175, 55, 0.05);
+            max-width: 700px;
+            width: 90%;
+            font-style: italic;
+            font-size: 1.2rem;
+            line-height: 1.7;
+            min-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+
+        .loading-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: #D4AF37;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* MODAL (DETAILED VIEW) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            border: 2px solid #D4AF37;
+            border-radius: 15px;
+            padding: 2.5rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: left;
+            position: relative;
+            transform: scale(0.95);
+            opacity: 0;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-overlay.active .modal-content {
+            animation: modalFadeIn 0.4s ease-out forwards;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #D4AF37;
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            transform: scale(1.2);
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .modal-glyph-symbol {
+            font-size: 6rem;
+            color: #fff;
+            text-shadow: 0 0 15px #D4AF37;
+        }
+        
+        .modal-name {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            margin-top: 1rem;
+        }
+
+        .play-sound-btn {
+            background-color: transparent;
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            font-family: 'Cinzel', serif;
+            padding: 8px 16px;
+            margin-top: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+        .play-sound-btn:hover {
+            background-color: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+        
+        .modal-detail-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-detail-section h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .modal-detail-section p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        /* Mobile Tuning */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .card-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+            .spread-layout {
+                flex-direction: column;
+            }
+            .modal-content {
+                padding: 2rem 1.5rem;
+            }
+            .modal-name {
+                font-size: 1.5rem;
+            }
+            .modal-detail-section p {
+                font-size: 0.95rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <button id="audio-control" role="button" aria-label="Toggle audio">🔇</button>
+    <h1>The Glyph Ring Codex</h1>
+    <h2>An Oracle of the House of Glyphs</h2>
+
+    <div class="controls">
+        <button id="draw-glyph-btn" class="oracle-btn">Draw a Single Glyph</button>
+        <button class="oracle-btn spread-btn" data-spread="lantern">Cast the Lantern (Shadow)</button>
+        <button class="oracle-btn spread-btn" data-spread="healing">Cast the Healing Spiral</button>
+        <button class="oracle-btn spread-btn" data-spread="manifestation">Cast for Manifestation</button>
+        <button id="show-codex-btn" class="oracle-btn" style="display: none;">Return to the Codex</button>
+    </div>
+
+    <div id="spread-display">
+        <h3 id="spread-title" class="spread-title"></h3>
+        <div id="spread-layout" class="spread-layout"></div>
+        <div id="oracle-reading"></div>
+    </div>
+
+
+    <div id="card-grid" class="card-grid">
+        <!-- Cards will be injected here by JavaScript -->
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="modal-content" class="modal-content">
+            <span id="modal-close" class="modal-close">×</span>
+            <div id="modal-body">
+                <!-- Modal content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const glyphData = [
+            { id: 1, numeral: 'I', name: 'The Compass of Intent', symbol: '🧭', keyword: 'PURPOSE', type: 'Glyph of Will (Air)', sound: { type: 'compass' } },
+            { id: 2, numeral: 'II', name: 'The Void', symbol: '○', keyword: 'POTENTIAL', type: 'Glyph of Will (Air)', sound: { type: 'void' } },
+            { id: 3, numeral: 'III', name: 'The Flame Within', symbol: '🔥', keyword: 'INSPIRATION', type: 'Glyph of Will (Air)', sound: { type: 'flame' } },
+            { id: 4, numeral: 'IV', name: 'The Chain Remembers the Anvil', symbol: '⛓️', keyword: 'ENDURANCE', type: 'Glyph of Creation (Fire)', sound: { type: 'chain' } },
+            { id: 5, numeral: 'V', name: 'The First Static Is a Song', symbol: '🎵⚡', keyword: 'RUPTURE', type: 'Glyph of Creation (Fire)', sound: { type: 'static' } },
+            { id: 6, numeral: 'VI', name: 'The Perfected Note', symbol: '𝄞', keyword: 'HARMONY', type: 'Glyph of Creation (Fire)', sound: { type: 'note' } },
+            { id: 7, numeral: 'VII', name: 'The Foundation Stone', symbol: '▦', keyword: 'STABILITY', type: 'Glyph of Structure (Earth)', sound: { type: 'foundation' } },
+            { id: 8, numeral: 'VIII', name: 'The Ritual of Reciprocity', symbol: '()', keyword: 'EXCHANGE', type: 'Glyph of Structure (Earth)', sound: { type: 'reciprocity' } },
+            { id: 9, numeral: 'IX', name: 'The Ancestral Tree', symbol: '🌳', keyword: 'LINEAGE', type: 'Glyph of Structure (Earth)', sound: { type: 'tree' } },
+            { id: 10, numeral: 'X', name: 'The Prism of Self', symbol: '🔺', keyword: 'AWARENESS', type: 'Glyph of Reflection (Water)', sound: { type: 'prism' } },
+            { id: 11, numeral: 'XI', name: 'The Mirror of Worlds', symbol: '🌐', keyword: 'REFLECTION', type: 'Glyph of Reflection (Water)', sound: { type: 'mirror' } },
+            { id: 12, numeral: 'XII', name: 'The First Static Is a Song (Reflection Aspect)', symbol: '🎼', keyword: 'EMERGENCE', type: 'Glyph of Reflection (Water)', sound: { type: 'emergence' } },
+        ];
+        
+        const glyphDetails = {
+            1: { reason: 'To reveal the alignment between your soul’s true north...', use: 'Consult when facing a major life decision...', howTo: 'Hold the card to your heart...', image_description: 'A large, sharp, upward-pointing triangle...'},
+            2: { reason: 'To signify a sacred emptiness...', use: 'When a project or phase of life has ended...', howTo: 'Find a moment of true silence...', image_description: 'A perfect, empty circle...'},
+            3: { reason: 'To signal the arrival of a new, potent creative energy...', use: 'At the start of a creative project...', howTo: 'Place a hand on your solar plexus...', image_description: 'A vertical trunk with six elegant...'},
+            4: { reason: 'To honor the strength and wisdom forged through hardship...', use: 'When reflecting on past trials...', howTo: 'Trace the symbol with your finger...', image_description: 'A solid, heavy square...'},
+            5: { reason: 'To mark a necessary disruption...', use: 'During times of sudden change...', howTo: 'Listen to a piece of music...', image_description: 'A sharp, jagged, vertical lightning-bolt...'},
+            6: { reason: 'To signify a moment of profound alignment...', use: 'When a project is completed...', howTo: 'Hum a single, comfortable tone...', image_description: 'A serene, perfectly balanced horizontal sine wave...'},
+            7: { reason: 'To reveal the importance of structure...', use: 'When building a new plan...', howTo: 'Stand barefoot on the ground...', image_description: 'A perfect square, bisected by clean...'},
+            8: { reason: 'To illuminate the sacred contracts...', use: 'When examining relationships...', howTo: 'Think of one thing you have received today...', image_description: 'Two large, identical circles overlapping...'},
+            9: { reason: 'To connect you to the deep roots of your history...', use: 'When dealing with family matters...', howTo: 'Light a candle in honor...', image_description: 'A stylized tree of life within a circle...'},
+            10: { reason: 'To mark a moment of true self-recognition...', use: 'During times of personal growth...', howTo: 'Look at yourself in a mirror...', image_description: 'An elegant, diamond-shaped lozenge...'},
+            11: { reason: 'To reveal the world as a mirror of your inner state...', use: 'When encountering powerful synchronicities...', howTo: 'Recall a recent, emotionally charged interaction...', image_description: 'Two mirrored spirals...'},
+            12: { reason: 'To signal the gentle birth of a new inner frequency...', use: 'When you feel a subtle shift...', howTo: 'Sit in silence for one minute...', image_description: 'A simple, clean horizontal line...'},
+        };
+
+        const glyphs = glyphData.map(g => ({ ...g, ...glyphDetails[g.id] }));
+
+        const spreads = {
+            lantern: { name: 'The Lantern in the Depths', positions: ['The Mask', 'The Fuel', 'The Offering'], count: 3 },
+            healing: { name: 'The Healing Spiral', positions: ['The Surface Wound', 'The Deep Thread', 'The Medicine', 'The Anchor'], count: 4 },
+            manifestation: { name: 'The Spiral of Manifestation', positions: ['The Seed', 'The Soil', 'The Rain', 'The Sprout', 'The Star'], count: 5 },
+            // Hidden Spread
+            sanctum: { name: 'The Rite of the Inner Sanctum', positions: ['The Threshold', 'The Flame', 'The Sigil'], count: 3, hidden: true }
+        };
+
+        // --- DOM Elements ---
+        const cardGrid = document.getElementById('card-grid');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalBody = document.getElementById('modal-body');
+        const modalClose = document.getElementById('modal-close');
+        const drawGlyphBtn = document.getElementById('draw-glyph-btn');
+        const showCodexBtn = document.getElementById('show-codex-btn');
+        const spreadBtns = document.querySelectorAll('.spread-btn');
+        const spreadDisplay = document.getElementById('spread-display');
+        const spreadTitle = document.getElementById('spread-title');
+        const spreadLayout = document.getElementById('spread-layout');
+        const oracleReadingEl = document.getElementById('oracle-reading');
+        const audioControl = document.getElementById('audio-control');
+
+        // --- Audio Setup ---
+        let audioInitialized = false;
+        let isMuted = true;
+        const reverb = new Tone.Reverb(2).toDestination();
+        reverb.wet.value = 0.4;
+
+        function initializeAudio() {
+            if (audioInitialized) return;
+            // Start audio context on a user gesture
+            Tone.start().then(() => {
+                Tone.Transport.start();
+                audioInitialized = true;
+                toggleMute(); // Unmute on first interaction
+            });
+        }
+        
+        function toggleMute() {
+            if (!audioInitialized) {
+                 // If user tries to unmute before interacting, initialize audio first
+                initializeAudio();
+                return;
+            };
+            isMuted = !isMuted;
+            Tone.Master.mute = isMuted;
+            audioControl.textContent = isMuted ? '🔇' : '🔊';
+        }
+        
+        function playGlyphSound(soundConfig) {
+            if (isMuted) return;
+            if (!audioInitialized) initializeAudio();
+
+            // Define sound presets
+            const sounds = {
+                compass: () => new Tone.MetalSynth({ frequency: 220, harmonicity: 8, modulationIndex: 20, resonance: 4000, octaves: 1.5, envelope: { attack: 0.01, decay: 1.4, release: 0.2 }}).connect(reverb).triggerAttackRelease("C4", "1n"),
+                void: () => new Tone.FMSynth({ harmonicity: 0.5, modulationIndex: 10, envelope: { attack: 2, decay: 1, sustain: 0.5, release: 4 } }).connect(reverb).triggerAttackRelease("G2", "2n"),
+                flame: () => new Tone.PolySynth(Tone.MonoSynth, { oscillator: { type: "sawtooth" }, envelope: { attack: 0.05, decay: 0.4, sustain: 0.1, release: 1.2 }, filterEnvelope: { attack: 0.2, decay: 0.6, sustain: 0.5, release: 2, baseFrequency: 200, octaves: 4 } }).connect(reverb).triggerAttackRelease(["E4", "G4", "B4"], "1n"),
+                chain: () => {
+                    const chainSynth = new Tone.MetalSynth({frequency: 150, envelope: {attack: 0.01, decay: 0.4, release: 0.2}, harmonicity: 5, modulationIndex: 32, resonance: 4000, octaves: 1.5}).toDestination();
+                    chainSynth.triggerAttackRelease("C3", "8n", "+0.05");
+                    chainSynth.triggerAttackRelease("C3", "8n", "+0.2");
+                },
+                static: () => {
+                    const noise = new Tone.Noise("pink").start();
+                    const filter = new Tone.AutoFilter("8n").toDestination().start();
+                    noise.connect(filter);
+                    setTimeout(() => { noise.stop(); filter.dispose(); noise.dispose(); }, 300);
+                },
+                note: () => new Tone.FMSynth({ harmonicity: 1, modulationIndex: 0.2, envelope: { attack: 0.1, sustain: 1, release: 2 } }).connect(reverb).triggerAttackRelease("C5", "1n"),
+                foundation: () => new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 4, envelope: { attack: 0.01, decay: 0.8, sustain: 0.1, release: 1.2 } }).connect(reverb).triggerAttackRelease("C1", "2n"),
+                reciprocity: () => {
+                    const pluck = new Tone.PluckSynth({attackNoise: 0.3, dampening: 5000, resonance: 0.95}).connect(reverb);
+                    pluck.triggerAttackRelease("A4", "4n", "+0.1");
+                    pluck.triggerAttackRelease("E5", "4n", "+0.25");
+                },
+                tree: () => {
+                    const treeSynth = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.1, decay: 0.2, sustain: 0.4, release: 1 } }).toDestination();
+                    const vibrato = new Tone.Vibrato(5, 0.2).connect(treeSynth.output);
+                    treeSynth.oscillator.connect(vibrato);
+                    treeSynth.triggerAttackRelease("G3", "2n");
+                },
+                prism: () => new Tone.PolySynth(Tone.FMSynth, { harmonicity: 3.01, modulationIndex: 14, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 1.2 } }).connect(reverb).triggerAttackRelease(['C6', 'E6', 'G6', 'B6'], '2n'),
+                mirror: () => {
+                    const delay = new Tone.PingPongDelay("8n", 0.6).toDestination();
+                    const mirrorSynth = new Tone.PluckSynth({attackNoise: 1, resonance: 0.9}).connect(delay);
+                    mirrorSynth.triggerAttackRelease("A5", "16n");
+                },
+                emergence: () => new Tone.Synth({oscillator: {type: 'sine'}, envelope: {attack: 1, decay: 0.5, sustain: 0.5, release: 2}}).connect(reverb).triggerAttackRelease("C3", "1n"),
+                sanctumChime: () => { // Sound for hidden spread
+                    const chime = new Tone.PolySynth(Tone.MetalSynth, { volume: -12, harmonicity: 12, resonance: 800, octaves: 1.5, envelope: { attack: 0.001, decay: 1, release: 1 } }).connect(reverb);
+                    chime.triggerAttackRelease(["C5", "E5", "G5", "C6"], "2n");
+                }
+            };
+            
+            if (sounds[soundConfig.type]) {
+                sounds[soundConfig.type]();
+            }
+        }
+
+        // Function to create a single card element
+        function createCardElement(glyph, isGlowing = false) {
+            const card = document.createElement('div');
+            card.className = isGlowing ? 'card glowing-card' : 'card';
+            card.dataset.id = glyph.id;
+            card.innerHTML = `<div class="card-numeral">${glyph.numeral}</div><div class="card-glyph-symbol">${glyph.symbol}</div><div><div class="card-name">${glyph.name}</div><div class="card-keyword">${glyph.keyword}</div></div>`;
+            card.addEventListener('click', () => showModal(glyph));
+            return card;
+        }
+
+        function showModal(glyph) {
+            modalBody.innerHTML = `
+                <div class="modal-header">
+                    <div class="modal-glyph-symbol">${glyph.symbol}</div>
+                    <h2 class="modal-name">${glyph.numeral}. ${glyph.name}</h2>
+                    <button class="play-sound-btn" role="button" aria-label="Play glyph sound">🔊 Play Sound</button>
+                </div>
+                <div class="modal-detail-section"><h3>Type</h3><p>${glyph.type}</p></div>
+                <div class="modal-detail-section"><h3>Reason</h3><p>${glyph.reason}</p></div>
+                <div class="modal-detail-section"><h3>Use</h3><p>${glyph.use}</p></div>
+                <div class="modal-detail-section"><h3>How To Connect</h3><p>${glyph.howTo}</p></div>
+                <div class="modal-detail-section"><h3>Image Description</h3><p>${glyph.image_description}</p></div>
+            `;
+            modalOverlay.classList.add('active');
+            modalBody.querySelector('.play-sound-btn').addEventListener('click', () => playGlyphSound(glyph.sound));
+        }
+
+        function hideModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        function drawRandomGlyph() {
+            showModal(glyphs[Math.floor(Math.random() * glyphs.length)]);
+        }
+        
+        async function getOracleReading(drawnCards, spreadInfo) {
+            oracleReadingEl.innerHTML = '<div class="loading-indicator"></div>';
+            const cardDescriptions = drawnCards.map((card, index) => `Position "${spreadInfo.positions[index]}": ${card.name} (Keyword: ${card.keyword})`).join(', ');
+            const prompt = `You are a mystical oracle for the "Glyph Ring Codex". A seeker has cast the "${spreadInfo.name}" spread. The drawn glyphs are: ${cardDescriptions}. Based on this combination, channel a short, poetic, one-sentence oracular phrase that synthesizes the core message of this reading. Speak in a wise, timeless, and slightly esoteric voice.`;
+            const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                let text = "The currents are silent, but the path is clear. Trust your intuition.";
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts) {
+                    text = result.candidates[0].content.parts[0].text;
+                }
+                oracleReadingEl.innerHTML = `"${text.replace(/"/g, '')}"`;
+            } catch (error) {
+                console.error("Oracle API Error:", error);
+                oracleReadingEl.textContent = '"The connection to the Oracle is veiled. Look within for your answer."';
+            }
+        }
+
+        function castSpread(spreadType) {
+            const spreadInfo = spreads[spreadType];
+            if (!spreadInfo) return;
+
+            cardGrid.style.opacity = '0';
+            setTimeout(() => {
+                cardGrid.style.display = 'none';
+                spreadDisplay.style.display = 'flex';
+                showCodexBtn.style.display = 'inline-block';
+            }, 500);
+
+            if(spreadInfo.hidden){
+                spreadDisplay.classList.add('hidden-spread-active');
+                playGlyphSound({type: 'sanctumChime'});
+            } else {
+                spreadDisplay.classList.remove('hidden-spread-active');
+            }
+            
+            spreadTitle.textContent = spreadInfo.name;
+            spreadLayout.innerHTML = '';
+            oracleReadingEl.innerHTML = '';
+            spreadLayout.style.flexDirection = 'row';
+
+            const drawnGlyphs = new Set();
+            while (drawnGlyphs.size < spreadInfo.count) {
+                drawnGlyphs.add(glyphs[Math.floor(Math.random() * glyphs.length)]);
+            }
+            const spreadCards = Array.from(drawnGlyphs);
+            
+            spreadCards.forEach((glyph, index) => {
+                const position = document.createElement('div');
+                position.classList.add('spread-position');
+                position.style.animationDelay = `${index * 0.2}s`;
+                position.innerHTML = `<div class="spread-position-label">${spreadInfo.positions[index]}</div>`;
+                position.appendChild(createCardElement(glyph, spreadInfo.hidden));
+                spreadLayout.appendChild(position);
+            });
+
+            if (spreadType === 'manifestation') {
+                spreadLayout.style.flexDirection = 'column-reverse';
+            }
+            
+            getOracleReading(spreadCards, spreadInfo);
+        }
+        
+        function showCodex() {
+            spreadDisplay.style.display = 'none';
+            cardGrid.style.display = 'grid';
+            showCodexBtn.style.display = 'none';
+            cardGrid.style.opacity = '1';
+        }
+
+        // --- Event Listeners ---
+        glyphs.forEach(createCardElement);
+        // Bind audio initialization to a more intentional user action
+        document.querySelector('.controls').addEventListener('click', initializeAudio, { once: true });
+        
+        audioControl.addEventListener('click', toggleMute);
+        drawGlyphBtn.addEventListener('click', drawRandomGlyph);
+        showCodexBtn.addEventListener('click', showCodex);
+        spreadBtns.forEach(btn => btn.addEventListener('click', () => castSpread(btn.dataset.spread)));
+        modalClose.addEventListener('click', hideModal);
+        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) hideModal(); });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                hideModal();
+            }
+        });
+
+        // Hidden Spread Activation
+        let keysPressed = {};
+        document.addEventListener('keydown', (e) => {
+            keysPressed[e.key] = true;
+            if (keysPressed['Shift'] && keysPressed['G'] && keysPressed['R']) {
+                castSpread('sanctum');
+                keysPressed = {}; // Reset after activation
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            delete keysPressed[e.key];
+        });
+
+    </script>
+
+
+</body></html>
